@@ -4,14 +4,10 @@ from typing import Any, MutableSet
 from aoc_helpers import get_input_path
 
 
-def set_from_range(range_: str) -> MutableSet[int]:
-    """Create a set of all ints within the given range.
-
-    Arguments:
-        range_: Given as a string with the format "<start>-<end>".
-    """
-    start, end = map(int, range_.split("-"))
-    return set(range(start, end + 1))
+def parse_range(rng: str) -> range:
+    """Parse an int range in string format "<start>-<end>" to a range object."""
+    start, end = map(int, rng.split("-"))
+    return range(start, end + 1)
 
 
 def union_all(sets: list[MutableSet[Any]]) -> MutableSet[Any]:
@@ -27,8 +23,9 @@ if __name__ == "__main__":
     sets_overlapping = 0
 
     for assignment in section_assignments:
-        ranges = assignment.split(",")
-        sets = [set_from_range(r) for r in ranges]
+        ranges = map(parse_range, assignment.split(","))
+        # Convert to sets of integers so we can use set theory.
+        sets: list = [set(rng) for rng in ranges]
         largest_set_size = max(len(s) for s in sets)
 
         combined_set = union_all(sets)
