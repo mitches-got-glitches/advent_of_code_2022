@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
-from typing import List
 
-from aoc_helpers import get_input_path
+from aoc_helpers import get_input_path, split_list
 
 
 @dataclass
@@ -15,7 +14,7 @@ class Elf:
             items.
     """
 
-    food_item_calories: List[int] = field(default_factory=list)
+    food_item_calories: list[int] = field(default_factory=list)
 
     @property
     def total_calories(self):
@@ -30,18 +29,10 @@ if __name__ == "__main__":
     with open(get_input_path()) as f:
         inventories = [line.strip() for line in f]
 
-    # Initialise elves.
-    elves: list[Elf] = []
-    elf = Elf()
-
-    for item_calories in inventories:
-        if item_calories == "":
-            # Save elf's inventory and start new one.
-            elves += [elf]
-            elf = Elf()
-        else:
-            elf.add_food_item_calories(int(item_calories))
-    elves += [elf]
+    elves = [
+        Elf([int(cals) for cals in item_calories])
+        for item_calories in split_list(inventories, "")
+    ]
 
     # Solution to part 1.
     total_calories_per_elf = sorted(elf.total_calories for elf in elves)
