@@ -1,0 +1,14 @@
+[project]
+name = "aoc-helpers"
+version = "0.1.0"
+description = "A set of convenience functions for Advent of Code."
+authors = [{name="mitches-got-glitches", email= "mitch.edmunds@proton.me"}]
+requires-python = ">= 3.12"
+dependencies = [
+    "dynaconf",
+]
+
+
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
