@@ -18,22 +18,6 @@ def parse_stacks(stacks: list[str]) -> list[list[str]]:
     return [list("".join(stack).strip()) for stack in transposed_stacks]
 
 
-def operate_cratemover_9000(
-    stacks: Stacks,
-    move_instructions: tuple[str, str, str],
-) -> Stacks:
-    """Given a set of stacks and some move instructions, operate the cratemaster."""
-    stacks_result = deepcopy(stacks)
-    # Loop through and pop the crate from the top of the stack, then append add
-    # to the end of stack it is being moved to.
-    for number_to_move, from_, to_ in move_instructions:
-        for _ in range(number_to_move):
-            to_move = stacks_result[from_].pop()
-            stacks_result[to_].append(to_move)
-
-    return stacks_result
-
-
 class CrateMover:
     """A class for CrateMover crane."""
 
@@ -85,11 +69,6 @@ if __name__ == "__main__":
 
     # Get the numbers from the move instructions (number_to_move, from, to).
     move_nums = [tuple(re.findall(r"\d{1,2}", move)) for move in moves_data]
-
-    # stacks_result = operate_cratemover_9000(starting_stacks, move_nums)
-    # pprint(stacks_result, compact=True)
-    # # Solution - Part 1
-    # pprint("".join([v[-1] for v in stacks_result.values()]))
 
     crate_mover = CrateMover(version="9000")
     stacks_result = crate_mover.operate(starting_stacks, move_nums)
