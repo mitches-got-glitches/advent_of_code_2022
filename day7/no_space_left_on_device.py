@@ -9,6 +9,16 @@ from aoc_helpers import get_input_path
 
 
 @dataclass
+class RegexEqual(str):
+    string: str
+    match: re.Match = None
+
+    def __eq__(self, pattern):
+        self.match = re.search(pattern, self.string)
+        return self.match is not None
+
+
+@dataclass
 class File:
     name: str
     size: int
@@ -57,29 +67,30 @@ def parse_directory_structure_from_stdout(stdout: list[str]) -> dict[Path, Dir |
     """Parse the directory structure from a list of stdout messages."""
     dir_structure: dict[Path, Dir | File] = {}
     for line in stdout:
-        if re.search(r"^\$ cd", line):
-            new_dir_name = re.search(r"(?<=cd\s).+", line)[0]
-            if new_dir_name == "/":
-                home_dir = Dir(name=new_dir_name)
-                current_dir = home_dir
-            elif new_dir_name == "..":
-                current_dir = current_dir.parent
-            else:
+        match RegexEqual(line):
+            case r"^\$ cd":
+                new_dir_name = re.search(r"(?<=cd\s).+", line)[0]
+                match new_dir_name:
+                    case "/":
+                        home_dir = Dir(name=new_dir_name)
+                        current_dir = home_dir
+                    case "..":
+                        current_dir = current_dir.parent
+                    case _:
+                        new_dir = Dir(new_dir_name, parent=current_dir)
+                        current_dir.dirs.update({new_dir.path: new_dir})
+                        current_dir = new_dir
+
+                dir_structure.update({current_dir.path: current_dir})
+            case r"^\d+":
+                # File format is: 476347 filename.ext
+                file_size, file_name = re.split(r" ", line)
+                file = File(name=file_name, size=int(file_size), parent=current_dir)
+                current_dir.files.update({file.path: file})
+            case r"^dir":
+                new_dir_name = re.split(r" ", line)[-1]
                 new_dir = Dir(new_dir_name, parent=current_dir)
                 current_dir.dirs.update({new_dir.path: new_dir})
-                current_dir = new_dir
-
-            dir_structure.update({current_dir.path: current_dir})
-
-        elif re.search(r"^\d+", line):
-            # File format is: 476347 filename.ext
-            file_size, file_name = re.split(r" ", line)
-            file = File(name=file_name, size=int(file_size), parent=current_dir)
-            current_dir.files.update({file.path: file})
-        elif re.search(r"^dir", line):
-            new_dir_name = re.split(r" ", line)[-1]
-            new_dir = Dir(new_dir_name, parent=current_dir)
-            current_dir.dirs.update({new_dir.path: new_dir})
 
     return dir_structure
 
