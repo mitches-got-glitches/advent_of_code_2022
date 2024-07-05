@@ -68,7 +68,7 @@ def parse_directory_structure_from_stdout(stdout: list[str]) -> dict[Path, Dir |
     dir_structure: dict[Path, Dir | File] = {}
     for line in stdout:
         match RegexEqual(line):
-            case r"^\$ cd":
+            case r"^\$ cd":  # A change directory command
                 new_dir_name = re.search(r"(?<=cd\s).+", line)[0]
                 match new_dir_name:
                     case "/":
@@ -82,12 +82,12 @@ def parse_directory_structure_from_stdout(stdout: list[str]) -> dict[Path, Dir |
                         current_dir = new_dir
 
                 dir_structure.update({current_dir.path: current_dir})
-            case r"^\d+":
+            case r"^\d+":  # Is a file
                 # File format is: 476347 filename.ext
                 file_size, file_name = re.split(r" ", line)
                 file = File(name=file_name, size=int(file_size), parent=current_dir)
                 current_dir.files.update({file.path: file})
-            case r"^dir":
+            case r"^dir":  # Is a directory
                 new_dir_name = re.split(r" ", line)[-1]
                 new_dir = Dir(new_dir_name, parent=current_dir)
                 current_dir.dirs.update({new_dir.path: new_dir})
@@ -103,8 +103,11 @@ if __name__ == "__main__":
     root_dir: Dir = dir_structure.get(Path("/"))
     dir_sizes = root_dir.calculate_sizes()
 
-    good_candidates = {path: size for path, size in dir_sizes.items() if size <= 10e4}
     # Solution to part 1
+    good_candidates = {
+        path: size for path, size in dir_sizes.items() if size <= 100_000
+    }
+    print("Sum of all directory sizes where the total size is no greater than 100,000:")
     print(sum(good_candidates.values()))
 
     # Solution to part 2
@@ -118,4 +121,7 @@ if __name__ == "__main__":
     deletion_candidates = {
         dir_: size for dir_, size in dir_sizes.items() if size >= target_space
     }
+    print(
+        "Size of smallest directory that if deleted, frees up enough space for the update:"
+    )
     print(min(deletion_candidates.values()))
