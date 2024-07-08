@@ -59,7 +59,7 @@ class MonkeyGame:
     monkeys: list[Monkey] = field(default_factory=list)
 
     def __post_init__(self):
-        self.monkey_dict = self.create_monkey_dict()
+        self.monkey_dict: dict[int, Monkey] = self.create_monkey_dict()
         # The lowest common multiple of the divisors is used in the modulo
         # function to keep the worry levels down, as it won't affect future
         # monkey divisor tests.
@@ -76,12 +76,20 @@ class MonkeyGame:
         for _ in range(n_rounds):
             self.play_round(use_lcm)
 
-    def create_monkey_dict(self):
-        monkey_copies = [deepcopy(m) for m in self.monkeys]
+    def create_monkey_dict(self) -> dict[int, Monkey]:
+        monkey_copies: list[Monkey] = [deepcopy(m) for m in self.monkeys]
         return dict(zip(range(len(self.monkeys)), monkey_copies))
 
     def reset(self):
         self.monkey_dict = self.create_monkey_dict()
+
+    def calculate_monkey_business(self):
+        """Monkey business is product of the inspections from the two most active monkeys."""
+        top_inspections = sorted(
+            map(lambda x: x.inspections, self.monkey_dict.values())
+        )
+        monkey1, monkey2 = top_inspections[-2:]
+        return monkey1 * monkey2
 
 
 @dataclass
@@ -140,15 +148,12 @@ if __name__ == "__main__":
     with open(get_input_path()) as f:
         monkey_notes = [line.rstrip("\n") for line in f]
 
-    monkeys = monkey_parser(monkey_notes)
-    game = MonkeyGame(monkeys)
+    game = MonkeyGame(*monkey_parser(monkey_notes))
     game.play_rounds(20)
-    top_2 = sorted(map(lambda x: x.inspections, game.monkey_dict.values()))[-2:]
     print("The level of monkey business after 20 rounds is:")
-    print(top_2[0] * top_2[1])
+    print(game.calculate_monkey_business())
 
     game.reset()
     game.play_rounds(10000, use_lcm=True)
-    top_2 = sorted(map(lambda x: x.inspections, game.monkey_dict.values()))[-2:]
     print("The level of monkey business after 10000 rounds is:")
-    print(top_2[0] * top_2[1])
+    print(game.calculate_monkey_business())
