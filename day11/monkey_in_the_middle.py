@@ -3,7 +3,6 @@ from __future__ import annotations
 import functools
 import operator
 import re
-from collections import OrderedDict
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Callable
@@ -95,7 +94,7 @@ class MonkeyGame:
 
     def create_monkey_dict(self):
         monkey_copies = [deepcopy(m) for m in self.monkeys]
-        return OrderedDict(zip(range(len(self.monkeys)), monkey_copies))
+        return dict(zip(range(len(self.monkeys)), monkey_copies))
 
     def reset(self):
         self.monkey_dict = self.create_monkey_dict()
