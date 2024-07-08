@@ -30,11 +30,11 @@ class Monkey:
     def throw_items(self, lcm: int | None = None) -> list[tuple[int, int]]:
         throws = []
         for item in self.items:
-            new_worry_level = self.inspect_item(item)
-            new_worry_level = self.keep_level_down(new_worry_level, lcm)
+            new_worry_level = self.keep_level_down(self.inspect_item(item), lcm)
             monkey_no = self.throw_to(new_worry_level)
             throws.append((monkey_no, new_worry_level))
 
+        # Items have all been thrown.
         self.items = []
         return throws
 
@@ -44,9 +44,9 @@ class Monkey:
 
     def keep_level_down(self, item: int, lcm: int | None = None):
         if not lcm:
-            item = item // 3
+            item //= 3
         elif item > lcm:
-            item = item % lcm
+            item %= lcm
 
         return item
 
@@ -67,11 +67,8 @@ class MonkeyGame:
 
     def play_round(self, use_lcm: bool = False):
         for monkey in self.monkey_dict.values():
-            if use_lcm:
-                throws = monkey.throw_items(self.lcm)
-            else:
-                throws = monkey.throw_items()
-
+            lcm = self.lcm if use_lcm else None
+            throws = monkey.throw_items(lcm)
             for to_monkey, item in throws:
                 self.monkey_dict[to_monkey].items.append(item)
 
@@ -85,11 +82,6 @@ class MonkeyGame:
 
     def reset(self):
         self.monkey_dict = self.create_monkey_dict()
-
-
-def by_itself(a: int, op: Callable[[int, int], int]) -> int:
-    """Apply an operator with both input arguments being the given value."""
-    return op(a, a)
 
 
 def monkey_parser(input: list[str]) -> list[Monkey]:
@@ -109,7 +101,10 @@ def monkey_parser(input: list[str]) -> list[Monkey]:
                 operator_, value = res[1], res[2]
                 # Partial returns a callable object with pre-supplied params.
                 if value == "old":
-                    func = functools.partial(by_itself, op=OPERATOR_MAP[operator_])
+                    func = functools.partial(
+                        lambda x, op: op(x, x),
+                        op=OPERATOR_MAP[operator_],
+                    )
                 else:
                     func = functools.partial(OPERATOR_MAP[operator_], int(value))
                 monkey_kwargs.update({"operation": func})
