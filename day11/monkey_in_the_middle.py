@@ -25,9 +25,7 @@ class Monkey:
     operation: Callable[[int], int]
     true_monkey: int
     false_monkey: int
-
-    def __post_init__(self):
-        self.inspections = 0
+    inspections: int = field(init=False, default=0)
 
     def throw_items(self, lcm: int | None = None) -> list[tuple[int, int]]:
         throws = []
