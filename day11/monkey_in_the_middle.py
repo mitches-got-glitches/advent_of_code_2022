@@ -84,6 +84,14 @@ class MonkeyGame:
         self.monkey_dict = self.create_monkey_dict()
 
 
+@dataclass
+class StartsWith(str):
+    string: str
+
+    def __eq__(self, pattern):
+        return self.string.startswith(pattern)
+
+
 def monkey_parser(input: list[str]) -> list[Monkey]:
     monkey_info = split_list([s.strip() for s in input], "")
 
@@ -91,32 +99,37 @@ def monkey_parser(input: list[str]) -> list[Monkey]:
     for monkey in monkey_info:
         monkey_kwargs = {}
         for line in monkey:
-            if line.startswith("Starting items:"):
-                monkey_kwargs.update(
-                    {"items": [int(s) for s in re.findall(r"\d+", line)]}
-                )
-            elif line.startswith("Operation:"):
-                # Get two match groups for the operator and value.
-                res = re.search(r"([\+\-\*\\%]+)\s(\d+|old)", line)
-                operator_, value = res[1], res[2]
-                # Partial returns a callable object with pre-supplied params.
-                if value == "old":
-                    func = functools.partial(
-                        lambda x, op: op(x, x),
-                        op=OPERATOR_MAP[operator_],
+            match StartsWith(line):
+                case "Starting items:":
+                    monkey_kwargs.update(
+                        {"items": [int(s) for s in re.findall(r"\d+", line)]}
                     )
-                else:
-                    func = functools.partial(OPERATOR_MAP[operator_], int(value))
-                monkey_kwargs.update({"operation": func})
+                case "Operation:":
+                    # Get two match groups for the operator and value.
+                    res = re.search(r"([\+\-\*\\%]+)\s(\d+|old)", line)
+                    operator_, value = res[1], res[2]
+                    # Partial returns a callable object with pre-supplied params.
+                    if value == "old":
+                        func = functools.partial(
+                            lambda x, op: op(x, x),
+                            op=OPERATOR_MAP[operator_],
+                        )
+                    else:
+                        func = functools.partial(OPERATOR_MAP[operator_], int(value))
+                    monkey_kwargs.update({"operation": func})
 
-            elif line.startswith("Test:"):
-                monkey_kwargs.update({"divisor": int(re.search(r"\d+", line)[0])})
+                case "Test:":
+                    monkey_kwargs.update({"divisor": int(re.search(r"\d+", line)[0])})
 
-            elif line.startswith("If true:"):
-                monkey_kwargs.update({"true_monkey": int(re.search(r"\d+", line)[0])})
+                case "If true:":
+                    monkey_kwargs.update(
+                        {"true_monkey": int(re.search(r"\d+", line)[0])}
+                    )
 
-            elif line.startswith("If false:"):
-                monkey_kwargs.update({"false_monkey": int(re.search(r"\d+", line)[0])})
+                case "If false:":
+                    monkey_kwargs.update(
+                        {"false_monkey": int(re.search(r"\d+", line)[0])}
+                    )
 
         monkeys.append(Monkey(**monkey_kwargs))
 
