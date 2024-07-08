@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 import itertools
 from dataclasses import dataclass, field
-from typing import Literal, Tuple
+from typing import Literal, Self, Tuple
 
 from aoc_helpers import get_input_path
 
@@ -38,10 +36,10 @@ class Position:
     def snapshot(self) -> Tuple[int, int]:
         return (self.x, self.y)
 
-    def get_euclidean_distance(self, other: Position) -> int:
+    def get_euclidean_distance(self, other: Self) -> int:
         return (other.x - self.x) ** 2 + (other.y - self.y) ** 2
 
-    def is_on_same_plane(self, other: Position) -> bool:
+    def is_on_same_plane(self, other: Self) -> bool:
         """Return True if either both x or both y are equal."""
         return (other.x == self.x) or (other.y == self.y)
 
@@ -76,8 +74,8 @@ class Rope:
 class RopeTracker:
     def __init__(self, knots: int):
         self.n_knots = knots
-        self.rope = [Position() for _ in range(knots)]
-        self.positions = []
+        self.rope: list[Position] = [Position() for _ in range(knots)]
+        self.positions: list[list[Position]] = []
         # Take initial snapshot for starting positions.
         self.snapshot()
 
