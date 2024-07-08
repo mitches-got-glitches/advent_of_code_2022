@@ -1,4 +1,5 @@
 import functools
+import math
 import operator
 import re
 from copy import deepcopy
@@ -15,16 +16,6 @@ OPERATOR_MAP = {
     "//": operator.floordiv,
     "%": operator.mod,
 }
-
-
-def gcd(a, b):
-    if b == 0:
-        return a
-    return gcd(b, a % b)
-
-
-def lcm(x, y):
-    return x * y / gcd(x, y)
 
 
 @dataclass
@@ -74,7 +65,7 @@ class MonkeyGame:
         # The lowest common multiple of the divisors is used in the modulo
         # function to keep the worry levels down, as it won't affect future
         # monkey divisor tests.
-        self.lcm = int(functools.reduce(lcm, [m.divisor for m in self.monkeys]))
+        self.lcm = int(functools.reduce(math.lcm, [m.divisor for m in self.monkeys]))
 
     def play_round(self, use_lcm: bool = False):
         for monkey in self.monkey_dict.values():
