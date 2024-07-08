@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import itertools
-from copy import copy, deepcopy
 from dataclasses import dataclass, field
 from typing import Literal, Tuple
 
@@ -59,6 +58,7 @@ class Rope:
         """Move the tail to follow the head."""
         e_dist = self.head.get_euclidean_distance(self.tail)
         if e_dist > 2:
+            # Move diagonally in the direction of head.
             if self.head.y != self.tail.y:
                 self.tail.y += int(
                     (self.head.y - self.tail.y) / abs(self.head.y - self.tail.y)
@@ -69,6 +69,8 @@ class Rope:
                 )
         elif e_dist == 2 and self.head.is_on_same_plane(self.tail):
             self.tail.move(direction)
+        elif e_dist <= 2:
+            pass
 
 
 class RopeTracker:
@@ -84,16 +86,10 @@ class RopeTracker:
         for _ in range(steps):
             rope = Rope(self.rope[0], self.rope[1])
             rope.move_head(direction)
-            self.rope[0] = deepcopy(rope.head)
             for i, knot in enumerate(self.rope[1:]):
                 previous_knot = self.rope[i]
                 rope = Rope(previous_knot, knot)
                 rope.move_tail(direction)
-                self.rope[i + 1] = deepcopy(rope.tail)
-                # try:
-                #     self.ropes[i+1].head = rope.tail
-                # except IndexError:
-                #     pass
             self.snapshot()
 
     def snapshot(self):
@@ -101,6 +97,7 @@ class RopeTracker:
         self.positions.append([knot.snapshot() for knot in self.rope])
 
     def visualise(self):
+        """Visualise each snapshot of the rope on a grid."""
         all_positions = list(itertools.chain.from_iterable(rope_tracker.positions))
         min_x = min(all_positions, key=lambda x: x[0])[0]
         max_x = max(all_positions, key=lambda x: x[0])[0]
@@ -147,6 +144,7 @@ if __name__ == "__main__":
     print("The amount of unique positions that the tail of the 2-knot rope visits is:")
     print(len({x[-1] for x in rope_tracker.positions}))
 
+    # Best to only visualise with the test input.
     # rope_tracker.visualise()
 
     # Solution to part 2
@@ -161,4 +159,5 @@ if __name__ == "__main__":
     print("The amount of unique positions that the tail of the 10-knot rope visits is:")
     print(len({x[-1] for x in rope_tracker.positions}))
 
+    # Best to only visualise with the test input.
     # rope_tracker.visualise()
