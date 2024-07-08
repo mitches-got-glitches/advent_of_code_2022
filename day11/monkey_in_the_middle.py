@@ -80,7 +80,7 @@ class MonkeyGame:
         self.lcm = int(functools.reduce(lcm, [m.divisor for m in self.monkeys]))
 
     def play_round(self, use_lcm: bool = False):
-        for monkey_no, monkey in self.monkey_dict.items():
+        for monkey in self.monkey_dict.values():
             if use_lcm:
                 throws = monkey.throw_items(self.lcm)
             else:
